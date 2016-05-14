@@ -1,3 +1,4 @@
-function sayHi() {
-    console.log("say  something");
-}
+import Sample from './Sample';
+
+let sample = new Sample("velopert");
+sample.say();

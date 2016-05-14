@@ -3,42 +3,50 @@
 import gulp from 'gulp';
 import gutil from 'gulp-util';
 
-import uglify from 'gulp-uglify';
 import cleanCSS from 'gulp-clean-css';
 import htmlmin from 'gulp-htmlmin';
 import imagemin from 'gulp-imagemin';
 import del from 'del';
 
+import babel from 'gulp-babel';
+import nodemon from 'gulp-nodemon';
+import Cache from 'gulp-file-cache';
+
+import webpack from 'gulp-webpack';
+import webpackConfig from './webpack.config.js';
+
+let cache = new Cache();
 
 const DIR = {
     SRC: 'src',
     DEST: 'dist'
 };
 
+
 const SRC = {
     JS: DIR.SRC + '/js/*.js',
     CSS: DIR.SRC + '/css/*.css',
     HTML: DIR.SRC + '/*.html',
-    IMAGES: DIR.SRC + '/images/*'
+    IMAGES: DIR.SRC + '/images/*',
+    SERVER: 'server/**/*.js'
 };
 
 const DEST = {
     JS: DIR.DEST + '/js',
     CSS: DIR.DEST + '/css',
     HTML: DIR.DEST + '/',
-    IMAGES: DIR.DEST + '/images'
+    IMAGES: DIR.DEST + '/images',
+    SERVER: 'app'
 };
 
 gulp.task('clean', () => {
     return del.sync([DIR.DEST]);
 });
 
-gulp.task('js', () => {
-    return gulp.src(SRC.JS)
-           .pipe(uglify())
-           .pipe(gulp.dest(DEST.JS));
-}); 
    
+gulp.task('webpack', () => {
+    return webpack(webpackConfig); 
+});
 
 gulp.task('css', () => {
     return gulp.src(SRC.CSS)
@@ -67,12 +75,23 @@ gulp.task('watch', () => {
 });
 */
 
+gulp.task('babel', () => {
+    return gulp.src(SRC.SERVER)
+           .pipe(cache.filter())
+           .pipe(babel({
+              presets: ['es2015']
+           }))
+           .pipe(cache.cache())
+           .pipe(gulp.dest(DEST.SERVER));
+});
+
 gulp.task('watch', () => {
     let watcher = {
-        js: gulp.watch(SRC.JS, ['js']),
+        webpack: gulp.watch(SRC.JS, ['webpack']),
         css: gulp.watch(SRC.CSS, ['css']),
         html: gulp.watch(SRC.HTML, ['html']),
-        images: gulp.watch(SRC.IMAGES, ['images'])
+        images: gulp.watch(SRC.IMAGES, ['images']),
+        babel: gulp.watch(SRC.SERVER, ['babel'])
     };
 
     let notify = (event) => {
@@ -82,9 +101,19 @@ gulp.task('watch', () => {
     for(let key in watcher) {
         watcher[key].on('change', notify);
     }
-
 });
 
-gulp.task('default', ['clean', 'js', 'css', 'html', 'images', 'watch'], () => {
+gulp.task('start', ['babel'], () => {
+    return nodemon({
+        script: DEST.SERVER + '/main.js',
+        watch: DEST.SERVER
+    });
+});
+
+
+gulp.task('default', ['clean', 'webpack', 'css', 'html',
+                      'images', 'watch', 'start'], () => {
     gutil.log('Gulp is running');
 });
+
+
