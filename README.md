@@ -8,4 +8,4 @@ In this project,
 * When there is a change in server code, the code will be transpiled automatically, then it will trigger the server to restart.
 * Client-side JavaScript is written in ES6 syntax
 * When there is a change in client-side, browser-sync will trigger the browser to referesh
-* html and css is minified by gulp plugins
+* html and css are minified by gulp plugins
