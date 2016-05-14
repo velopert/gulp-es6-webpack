@@ -1,6 +1,14 @@
-.item {
+body {
     background-color: black;
-    font-color: white;
+    color: aqua;
 }
 
-
+.main {
+    text-align: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    height: 400px;
+}

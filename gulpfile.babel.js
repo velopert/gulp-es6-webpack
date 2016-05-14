@@ -15,6 +15,8 @@ import Cache from 'gulp-file-cache';
 import webpack from 'gulp-webpack';
 import webpackConfig from './webpack.config.js';
 
+import browserSync from 'browser-sync';
+
 let cache = new Cache();
 
 const DIR = {
@@ -45,7 +47,9 @@ gulp.task('clean', () => {
 
    
 gulp.task('webpack', () => {
-    return webpack(webpackConfig); 
+    return gulp.src('src/js/main.js')
+           .pipe(webpack(webpackConfig))
+           .pipe(gulp.dest('dist/js'));
 });
 
 gulp.task('css', () => {
@@ -110,9 +114,17 @@ gulp.task('start', ['babel'], () => {
     });
 });
 
+gulp.task('browser-sync', () => {
+    browserSync.init(null, {
+        proxy: "http://localhost:3000",
+        files: ["dist/**/*.*"],
+        port: 7000
+    })
+});
+
 
 gulp.task('default', ['clean', 'webpack', 'css', 'html',
-                      'images', 'watch', 'start'], () => {
+                      'images', 'watch', 'start', 'browser-sync'], () => {
     gutil.log('Gulp is running');
 });
 
